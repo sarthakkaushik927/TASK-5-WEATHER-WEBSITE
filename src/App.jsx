@@ -90,6 +90,7 @@ const WeatherDashboard = ({ onLogout }) => {
                 const response = await fetch(API_URL);
                 if (!response.ok) throw new Error('City not found. Please try again.');
                 const data = await response.json();
+                console.log(data);
                 setWeatherData(data);
             } catch (err) {
                 setError(err.message);
@@ -212,7 +213,7 @@ const WeatherDashboard = ({ onLogout }) => {
                             {weatherData.forecast.forecastday[0].hour.map(hour => (
                                 <motion.div 
                                     key={hour.time_epoch} 
-                                    className="flex flex-col items-center space-y-2 p-3 rounded-lg flex-shrink-0 w-24 bg-white/10 cursor-pointer"
+                                    className="flex flex-col items-center space-y-2 p-3 rounded-lg shrink-0 w-24 bg-white/10 cursor-pointer"
                                     whileHover={{ scale: 1.05, y: -5, backgroundColor: "rgba(255, 255, 255, 0.2)" }}
                                     whileTap={{ scale: 0.95 }}
                                 >
@@ -267,14 +268,17 @@ export default function App() {
     );
 
     return (
-        <div className="bg-gradient-to-br from-gray-900 via-purple-900 to-gray-800 min-h-screen text-white flex items-center justify-center p-4 font-sans relative overflow-hidden">
+    
+        <div className="bg-linear-to-br from-gray-900 via-purple-900 to-gray-800 min-h-screen text-white flex items-center justify-center p-4 font-sans relative overflow-hidden">
             <BackgroundBubbles />
+            
             <AnimatePresence mode="wait">
                 {isLoggedIn ? (
                     <WeatherDashboard key="dashboard" onLogout={() => setIsLoggedIn(false)} />
                 ) : (
                     <AuthPage key="login" onLoginSuccess={() => setIsLoggedIn(true)} />
                 )}
+                
             </AnimatePresence>
         </div>
     );
