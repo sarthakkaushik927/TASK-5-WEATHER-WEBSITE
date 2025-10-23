@@ -21,6 +21,7 @@ const WeatherDashboard = ({ onLogout }) => {
         if (!response.ok) throw new Error('City not found. Please try again.');
         const data = await response.json();
         setWeatherData(data);
+        console.log(data);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -62,7 +63,7 @@ const WeatherDashboard = ({ onLogout }) => {
       initial="hidden"
       animate="visible"
     >
-      {/* Header */}
+      
       <motion.header variants={itemVariants} className="flex flex-wrap justify-between items-center mb-6 gap-4">
         <form onSubmit={handleSearch} className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
@@ -91,10 +92,10 @@ const WeatherDashboard = ({ onLogout }) => {
         </motion.div>
       )}
 
-      {/* Weather Data */}
+    
       {weatherData && (
         <main className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Current Weather */}
+         
           <motion.section
             variants={itemVariants}
             className="lg:col-span-3 bg-[#1E213A]/60 backdrop-blur-md border border-white/10 p-6 rounded-2xl flex flex-col sm:flex-row justify-between items-center"
@@ -117,7 +118,7 @@ const WeatherDashboard = ({ onLogout }) => {
             </div>
           </motion.section>
 
-          {/* Highlights */}
+         
           <motion.section variants={itemVariants} className="lg:col-span-3">
             <h2 className="text-2xl font-semibold mb-4">Today's Highlights</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -128,7 +129,7 @@ const WeatherDashboard = ({ onLogout }) => {
             </div>
           </motion.section>
 
-          {/* Forecast */}
+          
           <Forecast weatherData={weatherData} />
         </main>
       )}
@@ -146,7 +147,7 @@ const Highlight = ({ title, icon, value }) => (
 
 const Forecast = ({ weatherData }) => (
   <>
-    {/* Hourly Forecast */}
+    
     <motion.section className="lg:col-span-2 bg-[#1E213A]/60 backdrop-blur-md border border-white/10 p-6 rounded-2xl">
       <h2 className="text-2xl font-semibold mb-4">Today's Forecast</h2>
       <div className="flex space-x-4 overflow-x-auto pb-4">
@@ -164,7 +165,7 @@ const Forecast = ({ weatherData }) => (
       </div>
     </motion.section>
 
-    {/* 3-Day Forecast */}
+    
     <motion.section className="lg:col-span-1 bg-[#1E213A]/60 backdrop-blur-md border border-white/10 p-6 rounded-2xl">
       <h2 className="text-2xl font-semibold mb-4">3-Day Forecast</h2>
       <div className="space-y-3">
