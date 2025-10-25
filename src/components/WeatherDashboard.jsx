@@ -14,7 +14,7 @@ const WeatherDashboard = ({ onLogout }) => {
       setLoading(true);
       setError(null);
       const API_KEY = '30aa08af5a9e41a1ae2114054251606';
-      const API_URL = `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${city}&days=3&aqi=no&alerts=no`;
+      const API_URL = `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${city}&days=7&aqi=no&alerts=no`;
 
       try {
         const response = await fetch(API_URL);
@@ -131,6 +131,7 @@ const WeatherDashboard = ({ onLogout }) => {
 
           
           <Forecast weatherData={weatherData} />
+          
         </main>
       )}
     </motion.div>
