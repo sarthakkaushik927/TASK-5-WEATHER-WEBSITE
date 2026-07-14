@@ -1,21 +1,30 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { AnimatePresence } from 'framer-motion';
-import AuthPage from './components/AuthPage';
-import WeatherDashboard from './components/WeatherDashboard';
-import BackgroundBubbles from './components/BackgroundBubbles';
+import { useAuthContext } from './context/AuthContext';
+import AuthPage from './components/auth/AuthPage';
+import WeatherDashboard from './components/weather/WeatherDashboard';
+import BackgroundBubbles from './components/ui/BackgroundBubbles';
+import LoadingSpinner from './components/ui/LoadingSpinner';
 
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isAuthenticated, loading } = useAuthContext();
+
+  if (loading) {
+    return (
+      <div className="bg-linear-to-br from-gray-900 via-purple-900 to-gray-800 min-h-screen text-white flex items-center justify-center">
+        <LoadingSpinner message="Initializing..." />
+      </div>
+    );
+  }
 
   return (
     <div className="bg-linear-to-br from-gray-900 via-purple-900 to-gray-800 min-h-screen text-white flex items-center justify-center p-4 font-sans relative overflow-hidden">
       <BackgroundBubbles />
-      
       <AnimatePresence mode="wait">
-        {isLoggedIn ? (
-          <WeatherDashboard key="dashboard" onLogout={() => setIsLoggedIn(false)} />
+        {isAuthenticated ? (
+          <WeatherDashboard key="dashboard" />
         ) : (
-          <AuthPage key="login" onLoginSuccess={() => setIsLoggedIn(true)} />
+          <AuthPage key="auth" />
         )}
       </AnimatePresence>
     </div>
