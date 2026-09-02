@@ -2,6 +2,8 @@
 
 A full-stack weather application with user authentication and real-time weather data. Built with React + Vite (frontend) and Express (backend), deployed on Vercel using serverless functions.
 
+> 📘 **Junior Developer Guide**: Looking to build an HTML/CSS/JS frontend using this backend? Check out [JUNIOR_DEV_GUIDE.md](file:///d:/CCC/project/TASK-5-WEATHER-WEBSITE/JUNIOR_DEV_GUIDE.md) for full API docs, base rules, and code examples!
+
 ## Tech Stack
 
 | Layer    | Technology                          |

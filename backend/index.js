@@ -9,14 +9,8 @@ import ApiError from './utils/ApiError.js';
 
 const app = express();
 
-app.use(cors({
-  origin: env.NODE_ENV === 'production'
-    ? env.ALLOWED_ORIGINS
-    : '*',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+// CORS disabled / wide open for developer access from any origin (HTML/CSS/JS, Live Server, file://, etc.)
+app.use(cors());
 
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true }));
