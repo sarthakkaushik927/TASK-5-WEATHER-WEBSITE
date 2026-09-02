@@ -4,67 +4,77 @@ Welcome! This guide provides everything you need to build your HTML, CSS, and Va
 
 ---
 
-## 🚀 1. Base Rules & Requirements
+## 🌐 Base URL (API Server)
 
-1. **Base URL**:
-   - **Local Development**: `http://localhost:3001`
-   - **Production (Vercel)**: `https://task-5-weather-website.vercel.app` (or your deployed URL)
+- **Production (Vercel) [USE THIS FOR YOUR APP]**:
+  ```http
+  https://task-5-weather-website.vercel.app/api
+  ```
 
-2. **JSON Data Format**:
-   - For `POST` requests (`signup` & `login`), you **MUST** send `Content-Type: application/json` in headers and format the body with `JSON.stringify(data)`.
+- **Local Development (If running backend locally on your machine)**:
+  ```http
+  http://localhost:3001/api
+  ```
 
-3. **JWT Authentication Token**:
-   - When a user signs up or logs in, the server returns a JWT `token` inside `response.data.token`.
-   - **Store the token** in `localStorage`:
+---
+
+## 🚀 1. Base Rules & Core Concepts
+
+1. **Headers & JSON Data**:
+   - For `POST` requests (`signup` & `login`), you **MUST** send the header `'Content-Type': 'application/json'`.
+   - Pass the request body using `JSON.stringify({...})`.
+
+2. **JWT Authentication Token**:
+   - When a user signs up (`/api/auth/signup`) or logs in (`/api/auth/login`), the backend returns a JWT `token` in `response.data.token`.
+   - **Save token in browser storage**:
      ```javascript
-     localStorage.setItem('token', token);
+     localStorage.setItem('token', data.token);
      ```
-   - **Attach the token** to all protected requests (`profile`, `current weather`, `forecast`, `search`):
+   - **Send token for protected endpoints** (`profile`, `current weather`, `forecast`, `search`):
      ```javascript
      headers: {
        'Authorization': `Bearer ${localStorage.getItem('token')}`
      }
      ```
 
-4. **CORS is Disabled**:
-   - CORS restrictions have been disabled on the backend. You can call these APIs directly from your static HTML files opened in a browser (`file://`), standard VS Code Live Server (`http://127.0.0.1:5500`), or any local server.
+3. **CORS is Disabled**:
+   - You can call these endpoints directly from any origin: VS Code Live Server (`http://127.0.0.1:5500`), double-clicking static `index.html` (`file://`), or any custom server.
 
 ---
 
 ## 📋 2. Summary of API Endpoints
 
-| Method | Endpoint | Auth Required | Description |
+| Endpoint Name | Method | Auth Required? | Production Full URL |
 |---|---|---|---|
-| `GET` | `/api/health` | No | Health check (verifies if backend is running) |
-| `POST` | `/api/auth/signup` | No | Register a new user account |
-| `POST` | `/api/auth/login` | No | Login existing user and get JWT token |
-| `GET` | `/api/auth/profile` | **Yes** | Fetch current logged-in user's profile |
-| `GET` | `/api/weather/current?city={cityName}` | **Yes** | Fetch current weather data for a city |
-| `GET` | `/api/weather/forecast?city={cityName}&days=7` | **Yes** | Fetch weather forecast (1 to 10 days) |
-| `GET` | `/api/weather/search?q={query}` | **Yes** | Search city names for autocomplete |
+| **Health Check** | `GET` | No | `https://task-5-weather-website.vercel.app/api/health` |
+| **Signup** | `POST` | No | `https://task-5-weather-website.vercel.app/api/auth/signup` |
+| **Login** | `POST` | No | `https://task-5-weather-website.vercel.app/api/auth/login` |
+| **User Profile** | `GET` | **Yes** | `https://task-5-weather-website.vercel.app/api/auth/profile` |
+| **Current Weather** | `GET` | **Yes** | `https://task-5-weather-website.vercel.app/api/weather/current?city={cityName}` |
+| **Weather Forecast** | `GET` | **Yes** | `https://task-5-weather-website.vercel.app/api/weather/forecast?city={cityName}&days=7` |
+| **City Search** | `GET` | **Yes** | `https://task-5-weather-website.vercel.app/api/weather/search?q={query}` |
 
 ---
 
-## 📡 3. Detailed Endpoint Specifications
+## 📡 3. How to Call Each Endpoint (With Full Examples)
 
-### A. Health Check
-- **Endpoint**: `GET /api/health`
-- **Headers**: None
-- **Response (200 OK)**:
-  ```json
-  {
-    "status": "success",
-    "message": "Weather API is running.",
-    "timestamp": "2026-09-02T12:00:00.000Z",
-    "environment": "development"
-  }
-  ```
+### A. Health Check (`GET /api/health`)
+- **Full URL**: `https://task-5-weather-website.vercel.app/api/health`
+- **Auth Required**: No
+
+```javascript
+fetch('https://task-5-weather-website.vercel.app/api/health')
+  .then(res => res.json())
+  .then(data => console.log('Backend Status:', data))
+  .catch(err => console.error(err));
+```
 
 ---
 
-### B. User Signup
-- **Endpoint**: `POST /api/auth/signup`
-- **Headers**: `Content-Type: application/json`
+### B. User Signup (`POST /api/auth/signup`)
+- **Full URL**: `https://task-5-weather-website.vercel.app/api/auth/signup`
+- **Auth Required**: No
+- **Headers**: `'Content-Type': 'application/json'`
 - **Request Body**:
   ```json
   {
@@ -73,40 +83,44 @@ Welcome! This guide provides everything you need to build your HTML, CSS, and Va
     "password": "Password123!"
   }
   ```
-- **Validation Rules**:
-  - `name`: String, minimum 2 characters, max 50.
-  - `email`: Valid email format (e.g. `user@domain.com`).
-  - `password`: String, minimum 6 characters.
-- **Success Response (201 Created)**:
-  ```json
-  {
-    "status": "success",
-    "message": "Account created successfully.",
-    "data": {
-      "user": {
-        "_id": "64f1a2b3c4d5e6f7a8b9c0d1",
-        "name": "John Doe",
-        "email": "john@example.com",
-        "createdAt": "2026-09-02T12:00:00.000Z",
-        "updatedAt": "2026-09-02T12:00:00.000Z"
+
+#### How to Call in JavaScript:
+```javascript
+async function registerUser(name, email, password) {
+  try {
+    const response = await fetch('https://task-5-weather-website.vercel.app/api/auth/signup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6..."
+      body: JSON.stringify({ name, email, password }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      alert(`Signup Failed: ${result.message}`);
+      return;
     }
+
+    // Save token & user
+    localStorage.setItem('token', result.data.token);
+    localStorage.setItem('user', JSON.stringify(result.data.user));
+
+    alert('Account created successfully!');
+    window.location.href = 'weather.html'; // Go to main weather page
+  } catch (error) {
+    console.error('Error during signup:', error);
   }
-  ```
-- **Error Response (400 Bad Request / 409 Conflict)**:
-  ```json
-  {
-    "status": "fail",
-    "message": "An account with this email already exists."
-  }
-  ```
+}
+```
 
 ---
 
-### C. User Login
-- **Endpoint**: `POST /api/auth/login`
-- **Headers**: `Content-Type: application/json`
+### C. User Login (`POST /api/auth/login`)
+- **Full URL**: `https://task-5-weather-website.vercel.app/api/auth/login`
+- **Auth Required**: No
+- **Headers**: `'Content-Type': 'application/json'`
 - **Request Body**:
   ```json
   {
@@ -114,264 +128,280 @@ Welcome! This guide provides everything you need to build your HTML, CSS, and Va
     "password": "Password123!"
   }
   ```
-- **Success Response (200 OK)**:
-  ```json
-  {
-    "status": "success",
-    "message": "Logged in successfully.",
-    "data": {
-      "user": {
-        "_id": "64f1a2b3c4d5e6f7a8b9c0d1",
-        "name": "John Doe",
-        "email": "john@example.com"
-      },
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6..."
-    }
-  }
-  ```
-- **Error Response (401 Unauthorized)**:
-  ```json
-  {
-    "status": "fail",
-    "message": "Invalid email or password."
-  }
-  ```
 
----
-
-### D. Get Profile (Protected)
-- **Endpoint**: `GET /api/auth/profile`
-- **Headers**: `Authorization: Bearer <YOUR_STORED_JWT_TOKEN>`
-- **Success Response (200 OK)**:
-  ```json
-  {
-    "status": "success",
-    "data": {
-      "user": {
-        "_id": "64f1a2b3c4d5e6f7a8b9c0d1",
-        "name": "John Doe",
-        "email": "john@example.com"
-      }
-    }
-  }
-  ```
-
----
-
-### E. Current Weather (Protected)
-- **Endpoint**: `GET /api/weather/current?city=London`
-- **Query Params**:
-  - `city` (required): City name (e.g. `London`, `Tokyo`, `New York`)
-- **Headers**: `Authorization: Bearer <YOUR_STORED_JWT_TOKEN>`
-- **Success Response (200 OK)**:
-  ```json
-  {
-    "status": "success",
-    "data": {
-      "location": {
-        "name": "London",
-        "region": "City of London, Greater London",
-        "country": "United Kingdom",
-        "lat": 51.52,
-        "lon": -0.11,
-        "localtime": "2026-09-02 12:00"
-      },
-      "current": {
-        "temp_c": 18.5,
-        "temp_f": 65.3,
-        "is_day": 1,
-        "condition": {
-          "text": "Partly cloudy",
-          "icon": "//cdn.weatherapi.com/weather/64x64/day/116.png"
-        },
-        "wind_kph": 15.1,
-        "humidity": 68,
-        "feelslike_c": 18.5,
-        "uv": 4.0
-      }
-    }
-  }
-  ```
-
----
-
-### F. Weather Forecast (Protected)
-- **Endpoint**: `GET /api/weather/forecast?city=London&days=7`
-- **Query Params**:
-  - `city` (required): City name
-  - `days` (optional): Number of forecast days (1 to 10, default is 7)
-- **Headers**: `Authorization: Bearer <YOUR_STORED_JWT_TOKEN>`
-- **Success Response (200 OK)**:
-  Contains current weather data + `forecast.forecastday` array with daily stats (`maxtemp_c`, `mintemp_c`, `avgtemp_c`, `chance_of_rain`, `hour` array for hourly breakdown).
-
----
-
-### G. City Search / Autocomplete (Protected)
-- **Endpoint**: `GET /api/weather/search?q=Lon`
-- **Query Params**: `q` (required, minimum 2 characters)
-- **Headers**: `Authorization: Bearer <YOUR_STORED_JWT_TOKEN>`
-- **Success Response (200 OK)**:
-  ```json
-  {
-    "status": "success",
-    "data": [
-      {
-        "id": 2801268,
-        "name": "London",
-        "region": "City of London, Greater London",
-        "country": "United Kingdom",
-        "lat": 51.52,
-        "lon": -0.11
-      }
-    ]
-  }
-  ```
-
----
-
-## 💻 4. Vanilla JavaScript Code Examples
-
-Here are complete `fetch()` examples you can copy and use directly in your `app.js` file:
-
-### 1. Centralized API Fetch Helper (`api.js`)
+#### How to Call in JavaScript:
 ```javascript
-const BASE_URL = 'http://localhost:3001/api';
-
-async function apiRequest(endpoint, options = {}) {
-  const token = localStorage.getItem('token');
-  
-  const headers = {
-    'Content-Type': 'application/json',
-    ...(options.headers || {}),
-  };
-
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  const response = await fetch(`${BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || 'Something went wrong');
-  }
-
-  return data;
-}
-```
-
-### 2. User Signup Handler
-```javascript
-async function handleSignup(name, email, password) {
+async function loginUser(email, password) {
   try {
-    const result = await apiRequest('/auth/signup', {
+    const response = await fetch('https://task-5-weather-website.vercel.app/api/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ name, email, password }),
-    });
-
-    // Save token and user details
-    localStorage.setItem('token', result.data.token);
-    localStorage.setItem('user', JSON.stringify(result.data.user));
-
-    alert('Signup successful!');
-    window.location.href = 'dashboard.html'; // Redirect to main weather page
-  } catch (error) {
-    alert(`Signup Error: ${error.message}`);
-  }
-}
-```
-
-### 3. User Login Handler
-```javascript
-async function handleLogin(email, password) {
-  try {
-    const result = await apiRequest('/auth/login', {
-      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ email, password }),
     });
 
-    // Save token and user details
+    const result = await response.json();
+
+    if (!response.ok) {
+      alert(`Login Failed: ${result.message}`);
+      return;
+    }
+
+    // Save token & user
     localStorage.setItem('token', result.data.token);
     localStorage.setItem('user', JSON.stringify(result.data.user));
 
     alert('Login successful!');
-    window.location.href = 'dashboard.html';
+    window.location.href = 'weather.html';
   } catch (error) {
-    alert(`Login Error: ${error.message}`);
+    console.error('Error during login:', error);
   }
 }
 ```
 
-### 4. Fetch Current Weather & Forecast
+---
+
+### D. User Profile (`GET /api/auth/profile`)
+- **Full URL**: `https://task-5-weather-website.vercel.app/api/auth/profile`
+- **Auth Required**: **Yes** (`Authorization: Bearer <token>`)
+
+#### How to Call in JavaScript:
 ```javascript
-async function loadWeatherData(cityName) {
-  try {
-    // 1. Fetch current weather
-    const currentWeather = await apiRequest(`/weather/current?city=${encodeURIComponent(cityName)}`);
-    console.log('Current Weather:', currentWeather.data);
-
-    // 2. Fetch 7-day forecast
-    const forecast = await apiRequest(`/weather/forecast?city=${encodeURIComponent(cityName)}&days=7`);
-    console.log('Forecast Data:', forecast.data);
-
-    // Render data into HTML elements
-    document.getElementById('cityName').textContent = currentWeather.data.location.name;
-    document.getElementById('temp').textContent = `${currentWeather.data.current.temp_c}°C`;
-    document.getElementById('conditionText').textContent = currentWeather.data.current.condition.text;
-    document.getElementById('conditionIcon').src = `https:${currentWeather.data.current.condition.icon}`;
-
-  } catch (error) {
-    console.error('Weather error:', error.message);
-    alert(`Could not load weather: ${error.message}`);
-  }
-}
-```
-
-### 5. Check Logged-in User State & Logout
-```javascript
-function checkAuth() {
+async function getProfile() {
   const token = localStorage.getItem('token');
   if (!token) {
-    // User is not logged in, redirect to login page
     window.location.href = 'login.html';
+    return;
   }
-}
 
-function handleLogout() {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  window.location.href = 'login.html';
+  try {
+    const response = await fetch('https://task-5-weather-website.vercel.app/api/auth/profile', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    const result = await response.json();
+    if (response.ok) {
+      console.log('User Profile:', result.data.user);
+    }
+  } catch (error) {
+    console.error('Failed to get profile:', error);
+  }
 }
 ```
 
 ---
 
-## 🛠️ 5. How to Run the Backend Server Locally
+### E. Current Weather (`GET /api/weather/current`)
+- **Full URL**: `https://task-5-weather-website.vercel.app/api/weather/current?city=London`
+- **Query Parameter**: `city` (e.g. `London`, `Delhi`, `New York`)
+- **Auth Required**: **Yes** (`Authorization: Bearer <token>`)
 
-If you need to run the backend server on your machine during development:
+#### How to Call in JavaScript:
+```javascript
+async function getCurrentWeather(cityName) {
+  const token = localStorage.getItem('token');
 
-1. Open terminal in project directory:
-   ```bash
-   cd TASK-5-WEATHER-WEBSITE/backend
-   ```
-2. Make sure dependencies are installed:
-   ```bash
-   npm install
-   ```
-3. Start the dev server:
-   ```bash
-   npm run dev
-   ```
-   Or:
-   ```bash
-   node --env-file=../.env index.js
-   ```
-4. Server will run at: `http://localhost:3001`
-5. Test health endpoint in browser: `http://localhost:3001/api/health`
+  try {
+    const url = `https://task-5-weather-website.vercel.app/api/weather/current?city=${encodeURIComponent(cityName)}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      alert(`Weather error: ${result.message}`);
+      return;
+    }
+
+    const weatherData = result.data;
+    console.log('Location:', weatherData.location.name, weatherData.location.country);
+    console.log('Temp:', weatherData.current.temp_c, '°C');
+    console.log('Condition:', weatherData.current.condition.text);
+
+    // Update HTML Elements
+    document.getElementById('city').textContent = weatherData.location.name;
+    document.getElementById('temp').textContent = `${weatherData.current.temp_c}°C`;
+    document.getElementById('icon').src = `https:${weatherData.current.condition.icon}`;
+  } catch (error) {
+    console.error('Error fetching current weather:', error);
+  }
+}
+```
 
 ---
-Happy Coding! If you encounter any API issues, notify your team lead.
+
+### F. Weather Forecast (`GET /api/weather/forecast`)
+- **Full URL**: `https://task-5-weather-website.vercel.app/api/weather/forecast?city=London&days=7`
+- **Query Parameters**:
+  - `city` (required): City name
+  - `days` (optional): Number of forecast days (1 to 10, default is 7)
+- **Auth Required**: **Yes** (`Authorization: Bearer <token>`)
+
+#### How to Call in JavaScript:
+```javascript
+async function getWeatherForecast(cityName, days = 7) {
+  const token = localStorage.getItem('token');
+
+  try {
+    const url = `https://task-5-weather-website.vercel.app/api/weather/forecast?city=${encodeURIComponent(cityName)}&days=${days}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      const forecastDays = result.data.forecast.forecastday;
+      console.log('Forecast Days:', forecastDays);
+      
+      forecastDays.forEach(day => {
+        console.log(`Date: ${day.date} | Max Temp: ${day.day.maxtemp_c}°C | Min Temp: ${day.day.mintemp_c}°C`);
+      });
+    }
+  } catch (error) {
+    console.error('Error fetching forecast:', error);
+  }
+}
+```
+
+---
+
+### G. City Search / Autocomplete (`GET /api/weather/search`)
+- **Full URL**: `https://task-5-weather-website.vercel.app/api/weather/search?q=Lon`
+- **Query Parameter**: `q` (minimum 2 characters)
+- **Auth Required**: **Yes** (`Authorization: Bearer <token>`)
+
+#### How to Call in JavaScript:
+```javascript
+async function searchCities(searchQuery) {
+  if (searchQuery.length < 2) return;
+  const token = localStorage.getItem('token');
+
+  try {
+    const url = `https://task-5-weather-website.vercel.app/api/weather/search?q=${encodeURIComponent(searchQuery)}`;
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    const result = await response.json();
+    if (response.ok) {
+      console.log('Matching Cities:', result.data);
+      // Returns array of objects: [{ id, name, region, country, lat, lon }, ...]
+    }
+  } catch (error) {
+    console.error('Search failed:', error);
+  }
+}
+```
+
+---
+
+## 💻 4. Complete HTML + CSS + JS Quickstart Template
+
+Here is a minimal HTML file for your junior developers to test immediately:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Weather App Test</title>
+  <style>
+    body { font-family: sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; }
+    input, button { width: 100%; padding: 10px; margin: 5px 0; box-sizing: border-box; }
+    .card { background: #f4f4f9; padding: 15px; border-radius: 8px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h2>1. Login Form</h2>
+  <input type="email" id="email" placeholder="Email" value="john@example.com">
+  <input type="password" id="password" placeholder="Password" value="Password123!">
+  <button onclick="handleLogin()">Login</button>
+  <button onclick="handleSignup()">Signup</button>
+
+  <h2>2. Fetch Weather</h2>
+  <input type="text" id="cityInput" placeholder="Enter City (e.g. London)" value="London">
+  <button onclick="fetchWeather()">Get Weather</button>
+
+  <div id="result" class="card">Results will appear here...</div>
+
+  <script>
+    const API_BASE = 'https://task-5-weather-website.vercel.app/api';
+
+    async function handleSignup() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      const res = await fetch(`${API_BASE}/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'Demo User', email, password })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem('token', data.data.token);
+        alert('Signup success! Token saved.');
+      } else {
+        alert(data.message);
+      }
+    }
+
+    async function handleLogin() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem('token', data.data.token);
+        alert('Login success! Token saved.');
+      } else {
+        alert(data.message);
+      }
+    }
+
+    async function fetchWeather() {
+      const token = localStorage.getItem('token');
+      if (!token) return alert('Please login or signup first!');
+
+      const city = document.getElementById('cityInput').value;
+      const res = await fetch(`${API_BASE}/weather/current?city=${encodeURIComponent(city)}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        const w = data.data;
+        document.getElementById('result').innerHTML = `
+          <h3>${w.location.name}, ${w.location.country}</h3>
+          <p>Temperature: <strong>${w.current.temp_c}°C</strong></p>
+          <p>Condition: ${w.current.condition.text}</p>
+          <img src="https:${w.current.condition.icon}" />
+        `;
+      } else {
+        alert(data.message);
+      }
+    }
+  </script>
+</body>
+</html>
+```
+
+---
+Happy Coding! Your junior developer can copy this entire guide or the HTML template to get started instantly.
